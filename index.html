@@ -204,6 +204,7 @@ input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outli
         <output id="party" aria-live="polite">0</output>
         <button type="button" id="pPlus" aria-label="יותר מלוות">+</button>
       </div>
+      <p class="hint" id="partyHint" aria-live="polite"></p>
     </div>
     <div class="lbl">תוספות</div>
     <div class="choices" id="addons" role="group" aria-label="תוספות"></div>
@@ -347,10 +348,21 @@ const svcCat=()=>S.svc?CATS.find(c=>c.items.some(i=>i.id===S.svc)):cat();
 const count=()=>svcCat().group?S.count:1;
 const chosenAddons=()=>ADDONS.filter(a=>S.addons.has(a.id));
 // מלוות שמצטרפות לכלה באותו בוקר, וההפסקה בין סיום האיפור לשעת היציאה
-const PARTY=new Set(['bride-mu','bride-full','bride-hair']),ESCORT={m:60,p:400},BUFFER=15;
+// כל מלווה מקבלת את השירות המקביל לשירות של הכלה: איפור, איפור ושיער, או תסרוקת
+const ESC_MAP={'bride-mu':'esc-mu','bride-full':'esc-full','bride-hair':'esc-hair'},PARTY=new Set(Object.keys(ESC_MAP)),BUFFER=15;
+const escort=()=>CATS.flatMap(c=>c.items).find(i=>i.id===(ESC_MAP[S.svc]||'esc-mu'));
 const party=()=>PARTY.has(S.svc)?S.party:0;
-function minutes(){const s=svc();if(!s)return 0;return s.m*count()+party()*ESCORT.m+chosenAddons().reduce((t,a)=>t+a.m,0)}
-function price(){const s=svc();if(!s)return 0;return s.p*count()+party()*ESCORT.p+chosenAddons().reduce((t,a)=>t+a.p,0)+(S.loc==='home'?CONFIG.homeFee:0)}
+function minutes(){const s=svc();if(!s)return 0;return s.m*count()+party()*escort().m+chosenAddons().reduce((t,a)=>t+a.m,0)}
+function price(){const s=svc();if(!s)return 0;return s.p*count()+party()*escort().p+chosenAddons().reduce((t,a)=>t+a.p,0)+(S.loc==='home'?CONFIG.homeFee:0)}
+// פירוט המחיר לפי רכיבים, להודעה ולמסך
+function priceLines(){
+  const s=svc();if(!s)return[];
+  const L=[[s.n+(count()>1?' × '+count():''),s.p*count()]];
+  if(party())L.push([escort().n+' × '+party(),escort().p*party()]);
+  chosenAddons().forEach(a=>L.push([a.n,a.p]));
+  if(S.loc==='home')L.push(['הגעה עד הבית',CONFIG.homeFee]);
+  return L;
+}
 const clock=t=>pad(Math.floor(t/60))+':'+pad(t%60);
 // בונה את הלו"ז אחורה משעת היציאה: הכלה אחרונה, כדי שהאיפור שלה יהיה הטרי ביותר
 function schedule(){
@@ -359,7 +371,7 @@ function schedule(){
   const[h,m]=r.split(':').map(Number),extra=chosenAddons().reduce((t,a)=>t+a.m,0),rows=[];
   let end=h*60+m-BUFFER;
   const add=(who,len)=>{rows.unshift({who,from:end-len,to:end});end-=len};
-  if(party()){add('הכלה',s.m+extra);for(let i=party();i>=1;i--)add('מלווה '+i,ESCORT.m)}
+  if(party()){add('הכלה',s.m+extra);for(let i=party();i>=1;i--)add('מלווה '+i,escort().m)}
   else if(count()>1){for(let i=count();i>=1;i--)add('אישה '+i,s.m+(i===count()?extra:0))}
   else add('את',s.m+extra);
   return rows[0].from<0?null:rows;
@@ -399,6 +411,7 @@ function renderExtras(){
   $('count').textContent=S.count;
   $('partyWrap').hidden=!PARTY.has(S.svc);
   $('party').textContent=S.party;
+  if(PARTY.has(S.svc))$('partyHint').textContent='כל מלווה: '+escort().n+', '+nis(escort().p);
   $('readyWrap').hidden=!sc.ready;
 }
 function isOpen(d){return !!CONFIG.hours[d.getDay()]&&d>=firstBookable&&!(CONFIG.closeHolidays&&isHoliday(d))}
@@ -445,6 +458,8 @@ function message(){
   L.push('משך: '+minutes()+' דקות');
   L.push('מיקום: '+(S.loc==='home'?'הגעה עד הבית, '+$('addr').value.trim():'בסטודיו'));
   if($('ready').value&&svcCat().ready)L.push('מוכנה עד: '+$('ready').value);
+  const pl=priceLines();
+  if(pl.length>1){L.push('פירוט מחיר:');pl.forEach(([n,p])=>L.push('• '+n+' – '+nis(p)))}
   L.push('הערכת מחיר: '+price()+' ₪');
   L.push('שם: '+$('name').value.trim());
   L.push('טלפון: '+$('phone').value.trim());
@@ -722,6 +737,7 @@ const PAT=[
   [/^(.+) \(\+(.+)\)$/,m=>{const t=tr(m[1]);return tri(t+' (+'+m[2]+')',t+' (+'+m[2]+')',t+' (+'+m[2]+')')}],
   [/^(.+?)(?: × (\d+))?(?: \+ (\d+) מלוות)?$/,m=>{if(!m[2]&&!m[3])return null;const t=tr(m[1]),x=m[2]?' × '+m[2]:'',p=n=>m[3]?' + '+m[3]+' '+n:'';return tri(t+x+p('companions'),t+x+p('proches'),t+x+p('acompañantes'))}],
   [/^(.+?) · הערכה (.+?)( · .+)?$/,m=>{const d=tr(m[1]),e=m[3]||'';return tri(d+' · estimate '+m[2]+e,d+' · estimation '+m[2]+e,d+' · estimación '+m[2]+e)}],
+  [/^כל מלווה: (.+), (.+)$/,m=>{const t=tr(m[1]);return tri('Each companion: '+t+', '+m[2],'Par proche : '+t+', '+m[2],'Cada acompañante: '+t+', '+m[2])}],
   [/^מלווה (\d+)$/,m=>tri('Bridesmaid '+m[1],'Proche '+m[1],'Acompañante '+m[1])],
   [/^אישה (\d+)$/,m=>tri('Guest '+m[1],'Personne '+m[1],'Persona '+m[1])],
   [/^כולל (\d+) דקות מרווח לפני היציאה\.$/,m=>tri('Includes '+m[1]+' minutes of spare time before you leave.','Inclut '+m[1]+' minutes de marge avant le départ.','Incluye '+m[1]+' minutos de margen antes de salir.')],
