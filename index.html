@@ -19,7 +19,17 @@
   --bg:#1c120d;--surface:#2b1c15;--ink:#f8ebe2;--muted:#c4a896;--line:#4c382c;
   --accent:#e3a98a;--on-accent:#2a160d;--gold:#e0b877;--warn:#ffab85;color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--body);direction:rtl}
+body{background:var(--bg);color:var(--ink);font:400 1.0625rem/1.55 var(--body);direction:rtl}
+:root.big{font-size:118.75%}
+html{scroll-padding-bottom:110px}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.topbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center}
+.langs{display:flex;flex-wrap:wrap;gap:6px}
+.langs .chip,.topbar .chip{padding:6px 12px;font-size:.9rem}
+.skip{position:absolute;inset-inline-start:16px;top:-60px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:20;text-decoration:none}
+.skip:focus{top:calc(8px + env(safe-area-inset-top,0px))}
+.a11y{font-size:.92rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;display:grid;gap:6px}
+.a11y h2{font-size:1.35rem}
 .wrap{max-width:860px;margin-inline:auto;padding-block:28px 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:40px}
 .logo{display:grid;justify-items:center;gap:6px;direction:ltr;text-align:center}
 .logoName{font:400 clamp(2.4rem,8vw,3.6rem)/1 var(--display);letter-spacing:.02em}
@@ -66,7 +76,7 @@ h2 span{font:700 .95rem var(--body);color:var(--gold);font-variant-numeric:tabul
 .svc{all:unset;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;padding:14px 8px;border-bottom:1px solid var(--line)}
 .svc b{font-weight:700}
 .svc small{grid-column:1;color:var(--muted);font-size:.92rem;line-height:1.35}
-.svc em{font-style:normal;grid-row:1/3;grid-column:2;text-align:left;font-variant-numeric:tabular-nums;font-size:.95rem}
+.svc em{font-style:normal;grid-row:1/3;grid-column:2;text-align:end;font-variant-numeric:tabular-nums;font-size:.95rem}
 .svc em u{display:block;text-decoration:none;color:var(--muted);font-size:.85rem}
 .svc[aria-pressed="true"]{background:var(--surface);box-shadow:inset -3px 0 0 var(--accent)}
 .svc:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
@@ -124,7 +134,17 @@ input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outli
 @media (prefers-reduced-motion:reduce){.pan i{transition:none}}
 </style>
 
-<div class="wrap" dir="rtl">
+<div class="wrap" dir="rtl" id="wrap">
+  <a class="skip" href="#h1s">דילוג לקביעת התור</a>
+  <div class="topbar">
+    <nav class="langs" aria-label="בחירת שפה">
+      <button type="button" class="chip" data-lang="he" lang="he" aria-pressed="true">עברית</button>
+      <button type="button" class="chip" data-lang="en" lang="en" aria-pressed="false">English</button>
+      <button type="button" class="chip" data-lang="fr" lang="fr" aria-pressed="false">Français</button>
+      <button type="button" class="chip" data-lang="es" lang="es" aria-pressed="false">Español</button>
+    </nav>
+    <button type="button" class="chip" id="bigText" aria-pressed="false">הגדלת טקסט</button>
+  </div>
   <div class="logo" role="img" aria-label="Nitza Dahan Makeup Artist">
     <span class="logoName">Nitza Dahan</span>
     <span class="logoSub">MAKEUP ARTIST</span>
@@ -145,7 +165,7 @@ input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outli
   <section aria-labelledby="hl">
     <h2 id="hl">סגנונות האיפור של ניצה</h2>
     <p class="hint">הגוונים נדגמו מהשפתיים, מהעפעף ומהלחי שבכל תמונה. בחרי תמונה, והעמוד כולו יקבל את גווניה.</p>
-    <div class="strip" id="strip"></div>
+    <div class="strip" id="strip" role="group" aria-label="סגנונות"></div>
     <div class="actions">
       <button type="button" class="btn send" id="useLook">בחירת הסגנון הזה</button>
       <button type="button" class="btn ghost" id="quizBtn">לא בטוחה? עני על שלוש שאלות קצרות</button>
@@ -155,25 +175,25 @@ input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outli
 
   <section aria-labelledby="h1s">
     <h2 id="h1s"><span>1</span>בחירת שירות</h2>
-    <div class="palette" id="palette"></div>
+    <div class="palette" id="palette" role="group" aria-label="קטגוריות"></div>
     <p class="hint" id="catNote"></p>
-    <div class="services" id="services"></div>
+    <div class="services" id="services" role="group" aria-label="שירותים"></div>
   </section>
 
   <section aria-labelledby="h2s">
     <h2 id="h2s"><span>2</span>מיקום ותוספות</h2>
     <div class="lbl">מיקום</div>
-    <div class="choices" id="loc"></div>
+    <div class="choices" id="loc" role="group" aria-label="מיקום"></div>
     <div class="field" id="addrWrap" hidden>
       <label for="addr">כתובת להגעה</label>
-      <input id="addr" autocomplete="street-address" placeholder="רחוב, מספר ועיר">
-      <div class="err" id="addrErr"></div>
+      <input id="addr" autocomplete="street-address" placeholder="רחוב, מספר ועיר" aria-describedby="addrErr">
+      <div class="err" id="addrErr" aria-live="polite"></div>
     </div>
     <div id="countWrap" hidden>
       <div class="lbl">מספר הנשים</div>
       <div class="stepper">
         <button type="button" id="minus" aria-label="פחות">−</button>
-        <output id="count">1</output>
+        <output id="count" aria-live="polite">1</output>
         <button type="button" id="plus" aria-label="יותר">+</button>
       </div>
     </div>
@@ -181,12 +201,12 @@ input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outli
       <div class="lbl">כמה מלוות יתאפרו איתך באותו היום?</div>
       <div class="stepper">
         <button type="button" id="pMinus" aria-label="פחות מלוות">−</button>
-        <output id="party">0</output>
+        <output id="party" aria-live="polite">0</output>
         <button type="button" id="pPlus" aria-label="יותר מלוות">+</button>
       </div>
     </div>
     <div class="lbl">תוספות</div>
-    <div class="choices" id="addons"></div>
+    <div class="choices" id="addons" role="group" aria-label="תוספות"></div>
   </section>
 
   <section aria-labelledby="h3s">
@@ -195,16 +215,16 @@ input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outli
       <div>
         <div class="calhead">
           <button type="button" id="prev" aria-label="החודש הקודם">›</button>
-          <strong id="month"></strong>
+          <strong id="month" aria-live="polite"></strong>
           <button type="button" id="next" aria-label="החודש הבא">‹</button>
         </div>
-        <div class="cal" id="cal"></div>
+        <div class="cal" id="cal" role="group" aria-label="לוח שנה"></div>
       </div>
       <div style="display:grid;gap:10px;align-content:start;min-width:0">
         <div class="lbl" id="slotTitle">שעת התחלה</div>
-        <div class="slots" id="slots"></div>
-        <p class="hint" id="slotHint"></p>
-        <div class="err" id="whenErr"></div>
+        <div class="slots" id="slots" role="group" aria-labelledby="slotTitle"></div>
+        <p class="hint" id="slotHint" aria-live="polite"></p>
+        <div class="err" id="whenErr" aria-live="polite"></div>
       </div>
     </div>
     <div class="field" id="readyWrap" hidden>
@@ -219,19 +239,25 @@ input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outli
   <section aria-labelledby="h4s">
     <h2 id="h4s"><span>4</span>פרטים אישיים</h2>
     <div class="row">
-      <div class="field"><label for="name">שם מלא</label><input id="name" autocomplete="name"><div class="err" id="nameErr"></div></div>
-      <div class="field"><label for="phone">טלפון נייד</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" style="text-align:right" placeholder="050-0000000"><div class="err" id="phoneErr"></div></div>
+      <div class="field"><label for="name">שם מלא</label><input id="name" autocomplete="name" aria-required="true" aria-describedby="nameErr"><div class="err" id="nameErr" aria-live="polite"></div></div>
+      <div class="field"><label for="phone">טלפון נייד</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="050-0000000" aria-required="true" aria-describedby="phoneErr"><div class="err" id="phoneErr" aria-live="polite"></div></div>
     </div>
     <div class="field"><label for="allergy">רגישות בעור או בעיניים, או אלרגיה למוצרים</label><input id="allergy" placeholder="אם אין, ניתן להשאיר ריק"></div>
     <div class="field"><label for="notes">הערות והשראה</label><textarea id="notes" rows="2" placeholder="סוג האירוע, צבע השמלה, הסגנון שאת אוהבת. ניתן לצרף תמונות בוואטסאפ."></textarea></div>
-    <div class="field"><label for="msg">כך תיראה ההודעה</label><textarea id="msg" class="preview" readonly></textarea></div>
+    <div class="field"><label for="msg">כך תיראה ההודעה</label><textarea id="msg" class="preview" readonly dir="rtl" lang="he"></textarea></div>
     <div class="actions">
       <a class="btn send" id="send" href="https://wa.me/" target="_blank" rel="noopener">שליחת הבקשה בוואטסאפ</a>
       <button type="button" class="btn ghost" id="copy">העתקת ההודעה</button>
     </div>
-    <div class="err" id="sendErr"></div>
-    <p class="hint" id="after" hidden></p>
+    <div class="err" id="sendErr" aria-live="polite"></div>
+    <p class="hint" id="after" hidden aria-live="polite"></p>
     <p class="terms">זוהי בקשה לתור. התור ייקבע רק לאחר אישור בוואטסאפ. בחתונות ובאירועים התאריך משוריין לאחר תשלום מקדמה, ותנאי הביטול נשלחים לפני התשלום. המחיר המוצג הוא הערכה, והמחיר הסופי ייקבע בעת האישור.</p>
+  </section>
+
+  <section class="a11y" aria-labelledby="a11yh">
+    <h2 id="a11yh">הצהרת נגישות</h2>
+    <p>חשוב לנו שכל אחת תוכל לקבוע תור בקלות. העמוד מותאם לשימוש במקלדת ובקורא מסך, כולל תיאורים לתמונות, ניגודיות צבעים מספקת, הודעות שגיאה מוקראות ואפשרות להגדלת טקסט.</p>
+    <p>אם נתקלת בקושי כלשהו, כתבי לנו בוואטסאפ למספר <span dir="ltr">058-7212163</span>, ונשמח לעזור ולקבוע את התור יחד. עדכון אחרון: נובמבר 2026.</p>
   </section>
 
   <div class="tab">
@@ -378,15 +404,15 @@ function renderExtras(){
 function isOpen(d){return !!CONFIG.hours[d.getDay()]&&d>=firstBookable&&!(CONFIG.closeHolidays&&isHoliday(d))}
 function renderCal(){
   const v=S.view;
-  $('month').textContent=new Intl.DateTimeFormat('he-IL',{month:'long',year:'numeric'}).format(v);
+  $('month').textContent=new Intl.DateTimeFormat(loc(),{month:'long',year:'numeric'}).format(v);
   $('prev').disabled=v<=new Date(today.getFullYear(),today.getMonth(),1);
   $('next').disabled=v>=lastMonth;
-  let h=['א','ב','ג','ד','ה','ו','ש'].map(x=>`<span>${x}</span>`).join('');
+  let h=weekdays().map(([s,l])=>`<span aria-hidden="true" title="${l}">${s}</span>`).join('');
   for(let i=0;i<v.getDay();i++)h+='<i></i>';
   const days=new Date(v.getFullYear(),v.getMonth()+1,0).getDate();
   for(let n=1;n<=days;n++){
     const d=new Date(v.getFullYear(),v.getMonth(),n),k=iso(d);
-    h+=`<button type="button" class="day" data-d="${k}" ${isOpen(d)?'':'disabled'} aria-pressed="${S.date===k}" aria-label="${new Intl.DateTimeFormat('he-IL',{weekday:'long',day:'numeric',month:'long'}).format(d)}">${n}</button>`;
+    h+=`<button type="button" class="day" data-d="${k}" ${isOpen(d)?'':'disabled'} aria-pressed="${S.date===k}" aria-label="${new Intl.DateTimeFormat(loc(),{weekday:'long',day:'numeric',month:'long'}).format(d)}">${n}</button>`;
   }
   $('cal').innerHTML=h;
 }
@@ -408,6 +434,7 @@ function fmtDate(k){const d=parseIso(k);return `${pad(d.getDate())}/${pad(d.getM
 function message(){
   const s=svc(),L=[];
   L.push('בקשה לתור');
+  if(LANG!=='he')L.push('שפת הלקוחה: '+LANGS[LANG].name);
   L.push('שירות: '+(s?s.n:''));
   const extras=chosenAddons().map(a=>a.n);
   if(party())extras.push('מלוות באותו היום × '+party());
@@ -445,12 +472,12 @@ function renderSummary(){
   $('send').href=waUrl();
 }
 function renderAll(){renderCats();renderExtras();renderCal();renderSlots();renderSummary()}
-function validPhone(v){return /^0(5\d)\d{7}$/.test(v.replace(/[\s-]/g,''))}
+function validPhone(v){const p=v.replace(/[\s()-]/g,'');return /^0(5\d)\d{7}$/.test(p)||/^\+\d{8,15}$/.test(p)}
 function validate(){
-  let ok=true;const set=(id,msg)=>{$(id).textContent=msg;if(msg)ok=false};
+  let ok=true;const set=(id,msg)=>{$(id).textContent=msg;if(msg)ok=false;const f={nameErr:'name',phoneErr:'phone',addrErr:'addr'}[id];if(f)$(f).setAttribute('aria-invalid',msg?'true':'false')};
   set('sendErr','');
   set('nameErr',$('name').value.trim().length<2?'הזיני שם מלא.':'');
-  set('phoneErr',validPhone($('phone').value)?'':'הזיני מספר טלפון נייד תקין, לדוגמה 050-1234567.');
+  set('phoneErr',validPhone($('phone').value)?'':'הזיני מספר טלפון נייד תקין, לדוגמה 050-1234567, או מספר בינלאומי שמתחיל ב-+.');
   set('addrErr',S.loc==='home'&&!$('addr').value.trim()?'הזיני כתובת להגעה.':'');
   set('whenErr',!S.date||!S.time?'בחרי תאריך ושעה.':'');
   if(!svc()){$('sendErr').textContent='בחרי שירות בשלב 1.';ok=false}
@@ -473,7 +500,7 @@ $('plus').onclick=()=>{S.count=Math.min(12,S.count+1);renderExtras();renderSlots
 $('pMinus').onclick=()=>{S.party=Math.max(0,S.party-1);renderExtras();renderSlots();renderSummary()};
 $('pPlus').onclick=()=>{S.party=Math.min(8,S.party+1);renderExtras();renderSlots();renderSummary()};
 $('wait').onclick=()=>{S.wait=!S.wait;$('wait').setAttribute('aria-pressed',S.wait);renderSummary()};
-$('toForm').onclick=()=>{const target=!svc()?'h1s':(!S.date||!S.time)?'h3s':'h4s';$(target).scrollIntoView({behavior:'smooth',block:'start'})};
+$('toForm').onclick=()=>{const target=!svc()?'h1s':(!S.date||!S.time)?'h3s':'h4s';$(target).scrollIntoView({behavior:SMOOTH(),block:'start'})};
 ['name','phone','allergy','notes','addr','ready'].forEach(id=>$(id).addEventListener('input',renderSummary));
 $('send').addEventListener('click',e=>{
   renderSummary();
@@ -552,16 +579,218 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;
   if(t.dataset.look){viewing=t.dataset.look;renderLook();return}
   if(t.dataset.qa){quizAnswers.push(t.dataset.qa);renderQuiz();return}
-  if(t.dataset.result){pickLook(t.dataset.result,t.dataset.svc);$('quiz').hidden=true;$('h3s').scrollIntoView({behavior:'smooth',block:'start'});return}
+  if(t.dataset.result){pickLook(t.dataset.result,t.dataset.svc);$('quiz').hidden=true;$('h3s').scrollIntoView({behavior:SMOOTH(),block:'start'});return}
   if(t.id==='quizAgain'){quizAnswers=[];renderQuiz()}
 });
 $('useLook').onclick=()=>{if(S.pick===viewing){S.pick=null;renderLook();renderSummary()}else pickLook(viewing)};
 $('quizBtn').onclick=()=>{quizAnswers=[];$('quiz').hidden=false;renderQuiz()};
 try{matchMedia('(prefers-color-scheme:dark)').addEventListener('change',dressPage);new MutationObserver(dressPage).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']})}catch{}
+// שפות: הטקסט בעמוד כתוב בעברית, והמתרגם מחליף אותו לפי המילון; ההודעה לניצה נשארת תמיד בעברית
+const LANGS={he:{dir:'rtl',loc:'he-IL',name:'עברית'},en:{dir:'ltr',loc:'en-GB',name:'English'},fr:{dir:'ltr',loc:'fr-FR',name:'Français'},es:{dir:'ltr',loc:'es-ES',name:'Español'}};
+let LANG='he';
+function loc(){return LANGS[LANG].loc}
+function SMOOTH(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}catch{return 'auto'}}
+function weekdays(){
+  if(LANG==='he')return['א','ב','ג','ד','ה','ו','ש'].map((s,i)=>[s,['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'][i]]);
+  const base=new Date(2026,10,1);
+  return[0,1,2,3,4,5,6].map(i=>{const d=new Date(base);d.setDate(1+i);return[new Intl.DateTimeFormat(loc(),{weekday:'narrow'}).format(d),new Intl.DateTimeFormat(loc(),{weekday:'long'}).format(d)]});
+}
+const TR={
+"תורים אצל ניצה דהן":["Book with Nitza Dahan","Rendez-vous avec Nitza Dahan","Citas con Nitza Dahan"],
+"דילוג לקביעת התור":["Skip to booking","Aller à la réservation","Ir a la reserva"],
+"בחירת שפה":["Language","Langue","Idioma"],
+"הגדלת טקסט":["Larger text","Agrandir le texte","Texto más grande"],
+"הקטנת טקסט":["Smaller text","Réduire le texte","Texto más pequeño"],
+"ניצה דהן | מאפרת כלות, אירועים והפקות":["Nitza Dahan | Bridal, event and production makeup","Nitza Dahan | Maquillage mariée, événements et productions","Nitza Dahan | Maquillaje de novias, eventos y producciones"],
+"העבודות באינסטגרם":["Portfolio on Instagram","Ses réalisations sur Instagram","Sus trabajos en Instagram"],
+"קביעת תור לאיפור ולעיצוב שיער":["Book a makeup or hair appointment","Réserver un rendez-vous maquillage ou coiffure","Reserva una cita de maquillaje o peinado"],
+"בחרי שירות, תאריך ושעה, ושלחי בקשה בוואטסאפ. התור ייקבע לאחר אישור.":["Choose a service, date and time, and send a request on WhatsApp. Your appointment is set once Nitza confirms it.","Choisissez une prestation, une date et une heure, puis envoyez votre demande sur WhatsApp. Le rendez-vous est fixé après confirmation.","Elige un servicio, fecha y hora, y envía tu solicitud por WhatsApp. La cita se fija cuando Nitza la confirma."],
+"תמונה מתוך העבודות של ניצה":["A look from Nitza's work","Une réalisation de Nitza","Un trabajo de Nitza"],
+"סגנונות האיפור של ניצה":["Nitza's makeup looks","Les looks de Nitza","Los looks de Nitza"],
+"הגוונים נדגמו מהשפתיים, מהעפעף ומהלחי שבכל תמונה. בחרי תמונה, והעמוד כולו יקבל את גווניה.":["The shades were sampled from the lips, eyelids and cheeks in each photo. Pick a photo and the whole page takes on its colors.","Les teintes ont été prélevées sur les lèvres, les paupières et les joues de chaque photo. Choisissez une photo et toute la page prend ses couleurs.","Los tonos se tomaron de los labios, párpados y mejillas de cada foto. Elige una foto y toda la página adopta sus colores."],
+"סגנונות":["Looks","Looks","Looks"],
+"בחירת הסגנון הזה":["Choose this look","Choisir ce look","Elegir este look"],
+"הסגנון הזה נבחר":["This look is selected","Look sélectionné","Look seleccionado"],
+"לא בטוחה? עני על שלוש שאלות קצרות":["Not sure? Answer three quick questions","Vous hésitez ? Répondez à trois petites questions","¿No estás segura? Responde tres preguntas rápidas"],
+"בחירת שירות":["Choose a service","Choisir une prestation","Elige un servicio"],
+"קטגוריות":["Categories","Catégories","Categorías"],
+"שירותים":["Services","Prestations","Servicios"],
+"מיקום ותוספות":["Location and extras","Lieu et options","Lugar y extras"],
+"מיקום":["Location","Lieu","Lugar"],
+"כתובת להגעה":["Address","Adresse","Dirección"],
+"רחוב, מספר ועיר":["Street, number and city","Rue, numéro et ville","Calle, número y ciudad"],
+"מספר הנשים":["Number of people","Nombre de personnes","Número de personas"],
+"פחות":["Fewer","Moins","Menos"],
+"יותר":["More","Plus","Más"],
+"כמה מלוות יתאפרו איתך באותו היום?":["How many bridesmaids or family members will get ready with you?","Combien de proches se feront maquiller avec vous ce jour-là ?","¿Cuántas acompañantes se maquillarán contigo ese día?"],
+"פחות מלוות":["Fewer companions","Moins de proches","Menos acompañantes"],
+"יותר מלוות":["More companions","Plus de proches","Más acompañantes"],
+"תוספות":["Extras","Options","Extras"],
+"תאריך ושעה":["Date and time","Date et heure","Fecha y hora"],
+"החודש הקודם":["Previous month","Mois précédent","Mes anterior"],
+"החודש הבא":["Next month","Mois suivant","Mes siguiente"],
+"לוח שנה":["Calendar","Calendrier","Calendario"],
+"שעת התחלה":["Start time","Heure de début","Hora de inicio"],
+"עד איזו שעה עלייך להיות מוכנה? (לא חובה)":["What time do you need to be ready by? (optional)","À quelle heure devez-vous être prête ? (facultatif)","¿A qué hora necesitas estar lista? (opcional)"],
+"אם המועד תפוס, אשמח להיכנס לרשימת ההמתנה":["If this time is taken, add me to the waiting list","Si ce créneau est pris, inscrivez-moi sur la liste d'attente","Si el horario está ocupado, añádeme a la lista de espera"],
+"פרטים אישיים":["Your details","Vos coordonnées","Tus datos"],
+"שם מלא":["Full name","Nom complet","Nombre completo"],
+"טלפון נייד":["Mobile phone","Téléphone portable","Teléfono móvil"],
+"רגישות בעור או בעיניים, או אלרגיה למוצרים":["Skin or eye sensitivity, or product allergies","Sensibilité de la peau ou des yeux, ou allergies","Sensibilidad en piel u ojos, o alergias a productos"],
+"אם אין, ניתן להשאיר ריק":["Leave blank if none","Laissez vide si aucune","Déjalo vacío si no hay"],
+"הערות והשראה":["Notes and inspiration","Remarques et inspiration","Notas e inspiración"],
+"סוג האירוע, צבע השמלה, הסגנון שאת אוהבת. ניתן לצרף תמונות בוואטסאפ.":["Type of event, dress color, the style you like. You can send photos on WhatsApp.","Type d'événement, couleur de la robe, le style que vous aimez. Vous pouvez envoyer des photos sur WhatsApp.","Tipo de evento, color del vestido, el estilo que te gusta. Puedes enviar fotos por WhatsApp."],
+"כך תיראה ההודעה":["Your message (sent to Nitza in Hebrew)","Votre message (envoyé à Nitza en hébreu)","Tu mensaje (se envía a Nitza en hebreo)"],
+"שליחת הבקשה בוואטסאפ":["Send request on WhatsApp","Envoyer la demande sur WhatsApp","Enviar solicitud por WhatsApp"],
+"העתקת ההודעה":["Copy message","Copier le message","Copiar mensaje"],
+"ההודעה הועתקה":["Message copied","Message copié","Mensaje copiado"],
+"ההודעה סומנה. העתיקי אותה ידנית":["Message selected. Copy it manually","Message sélectionné. Copiez-le manuellement","Mensaje seleccionado. Cópialo manualmente"],
+"זוהי בקשה לתור. התור ייקבע רק לאחר אישור בוואטסאפ. בחתונות ובאירועים התאריך משוריין לאחר תשלום מקדמה, ותנאי הביטול נשלחים לפני התשלום. המחיר המוצג הוא הערכה, והמחיר הסופי ייקבע בעת האישור.":["This is an appointment request. It is confirmed only after Nitza replies on WhatsApp. For weddings and events, the date is reserved once a deposit is paid, and the cancellation terms are sent before payment. The price shown is an estimate; the final price is set on confirmation.","Ceci est une demande de rendez-vous. Il n'est confirmé qu'après la réponse de Nitza sur WhatsApp. Pour les mariages et événements, la date est réservée après versement d'un acompte ; les conditions d'annulation sont envoyées avant le paiement. Le prix affiché est une estimation ; le prix final est fixé lors de la confirmation.","Esta es una solicitud de cita. Se confirma solo cuando Nitza responde por WhatsApp. Para bodas y eventos, la fecha se reserva tras pagar un anticipo, y las condiciones de cancelación se envían antes del pago. El precio mostrado es una estimación; el precio final se fija al confirmar."],
+"טרם נבחר שירות":["No service selected yet","Aucune prestation choisie","Aún no has elegido servicio"],
+"בחרי שירות כדי לראות את משכו ואת מחירו":["Choose a service to see its length and price","Choisissez une prestation pour voir sa durée et son prix","Elige un servicio para ver su duración y precio"],
+"להשלמת הפרטים":["Continue","Continuer","Continuar"],
+"הצהרת נגישות":["Accessibility","Accessibilité","Accesibilidad"],
+"חשוב לנו שכל אחת תוכל לקבוע תור בקלות. העמוד מותאם לשימוש במקלדת ובקורא מסך, כולל תיאורים לתמונות, ניגודיות צבעים מספקת, הודעות שגיאה מוקראות ואפשרות להגדלת טקסט.":["We want everyone to be able to book easily. This page works with a keyboard and screen readers, with image descriptions, sufficient color contrast, announced error messages and a larger-text option.","Nous voulons que chacune puisse réserver facilement. Cette page fonctionne au clavier et avec les lecteurs d'écran, avec des descriptions d'images, un contraste suffisant, des messages d'erreur annoncés et une option pour agrandir le texte.","Queremos que todas puedan reservar fácilmente. Esta página funciona con teclado y lectores de pantalla, con descripciones de imágenes, contraste suficiente, mensajes de error anunciados y opción de texto más grande."],
+"אם נתקלת בקושי כלשהו, כתבי לנו בוואטסאפ למספר":["If you run into any difficulty, write to us on WhatsApp at","Si vous rencontrez une difficulté, écrivez-nous sur WhatsApp au","Si encuentras alguna dificultad, escríbenos por WhatsApp al"],
+", ונשמח לעזור ולקבוע את התור יחד. עדכון אחרון: נובמבר 2026.":[" and we'll gladly help you book. Last updated: November 2026."," et nous vous aiderons volontiers à réserver. Dernière mise à jour : novembre 2026."," y te ayudaremos encantadas a reservar. Última actualización: noviembre de 2026."],
+"כלות":["Brides","Mariées","Novias"],"מלוות":["Bridal party","Proches","Acompañantes"],"ערב ואירועים":["Evening & events","Soirées et événements","Noche y eventos"],"עיצוב שיער":["Hair styling","Coiffure","Peinados"],"הפקות וצילומים":["Shoots & productions","Shootings et productions","Sesiones y producciones"],"סדנאות":["Workshops","Ateliers","Talleres"],
+"מומלץ לקבוע כמה חודשים מראש. איפור ניסיון נקבע בתור נפרד, כמה שבועות לפני החתונה.":["Best booked a few months ahead. The trial is booked separately, a few weeks before the wedding.","À réserver quelques mois à l'avance. L'essai se réserve à part, quelques semaines avant le mariage.","Mejor reservar con unos meses de antelación. La prueba se reserva aparte, unas semanas antes de la boda."],
+"ניתן להזמין עבור כמה נשים יחד. משך השירות והמחיר מחושבים לפי מספר הנשים.":["You can book for several people together. Length and price are calculated per person.","Vous pouvez réserver pour plusieurs personnes. La durée et le prix sont calculés par personne.","Puedes reservar para varias personas. La duración y el precio se calculan por persona."],
+"איפור כלה":["Bridal makeup","Maquillage de mariée","Maquillaje de novia"],"עמיד לאורך כל האירוע ומותאם לתאורת האולם ולצילום":["Lasts all night, adapted to the venue lighting and photos","Tient toute la soirée, adapté à l'éclairage et aux photos","Dura toda la noche, adaptado a la luz del salón y a las fotos"],
+"איפור ועיצוב שיער לכלה":["Bridal makeup and hair","Maquillage et coiffure de mariée","Maquillaje y peinado de novia"],"חבילה מלאה ליום החתונה":["Full wedding-day package","Forfait complet pour le jour J","Paquete completo para el día de la boda"],
+"תסרוקת כלה":["Bridal hairstyle","Coiffure de mariée","Peinado de novia"],"כולל קיבוע הינומה ואביזרי שיער שתביאי איתך":["Includes fixing the veil and any hair accessories you bring","Comprend la fixation du voile et des accessoires que vous apportez","Incluye fijar el velo y los accesorios que traigas"],
+"איפור ניסיון לכלה":["Bridal makeup trial","Essai maquillage mariée","Prueba de maquillaje de novia"],"בונות יחד את המראה לפני יום החתונה":["We create your look together before the wedding","Nous créons votre look ensemble avant le mariage","Creamos juntas tu look antes de la boda"],
+"איפור ותסרוקת ניסיון":["Makeup and hair trial","Essai maquillage et coiffure","Prueba de maquillaje y peinado"],"ניסיון מלא, כדי שביום החתונה לא יהיו הפתעות":["A full trial, so there are no surprises on the day","Un essai complet, pour éviter les surprises le jour J","Una prueba completa para que no haya sorpresas el gran día"],
+"אירועים לפני החתונה":["Pre-wedding events","Événements avant le mariage","Eventos previos a la boda"],"חינה, שבת כלה וצילומים לפני החתונה":["Henna, Shabbat Kallah and pre-wedding shoots","Henné, Chabbat Kalla et séances photo avant le mariage","Henna, Shabat Kalá y sesiones de fotos previas"],
+"אם הכלה או אם החתן":["Mother of the bride or groom","Mère de la mariée ou du marié","Madre de la novia o del novio"],"איפור עמיד ומחמיא, עדין לעור":["Long-lasting, flattering and gentle on the skin","Longue tenue, flatteur et doux pour la peau","Duradero, favorecedor y suave con la piel"],
+"איפור למלווה":["Bridal party makeup","Maquillage des proches","Maquillaje para acompañantes"],"אחיות, גיסות וחברות":["Sisters, sisters-in-law and friends","Sœurs, belles-sœurs et amies","Hermanas, cuñadas y amigas"],
+"איפור ועיצוב שיער למלווה":["Makeup and hair for the bridal party","Maquillage et coiffure des proches","Maquillaje y peinado para acompañantes"],"מוכנות לצילומים":["Ready for the photos","Prêtes pour les photos","Listas para las fotos"],
+"תסרוקת למלווה":["Bridal party hairstyle","Coiffure des proches","Peinado para acompañantes"],"שיער גלי, אסוף או חצי אסוף":["Waves, updo or half-up","Ondulé, attaché ou semi-attaché","Ondas, recogido o semirrecogido"],
+"סבתות הכלה והחתן":["Grandmothers of the bride and groom","Grands-mères des mariés","Abuelas de los novios"],"איפור עדין ונוח לעור בוגר":["Gentle makeup, comfortable for mature skin","Maquillage doux, confortable pour les peaux matures","Maquillaje suave y cómodo para piel madura"],
+"איפור ערב":["Evening makeup","Maquillage de soirée","Maquillaje de noche"],"לחתונה, לגאלה או לבילוי":["For a wedding, gala or night out","Pour un mariage, un gala ou une sortie","Para una boda, gala o salida"],
+"איפור ועיצוב שיער לאירוע":["Event makeup and hair","Maquillage et coiffure pour événement","Maquillaje y peinado para eventos"],"מראה ערב שלם":["A complete evening look","Un look de soirée complet","Un look de noche completo"],
+"איפור לחינה":["Henna makeup","Maquillage pour henné","Maquillaje para henna"],"צבעוני, עשיר ועמיד":["Colorful, rich and long-lasting","Coloré, riche et longue tenue","Colorido, intenso y duradero"],
+"אירוסין ושבת חתן":["Engagement and Shabbat Chatan","Fiançailles et Chabbat Hatan","Compromiso y Shabat Jatán"],"איפור חגיגי ורך":["Festive, soft makeup","Maquillage festif et doux","Maquillaje festivo y suave"],
+"ברית ובריתה":["Brit and baby celebration","Brit Mila et fête de naissance","Brit y celebración del bebé"],"ליולדת: איפור קליל ועדין":["For the new mom: light, gentle makeup","Pour la jeune maman : maquillage léger et doux","Para la nueva mamá: maquillaje ligero y suave"],
+"בת מצווה":["Bat Mitzvah","Bat Mitzvah","Bat Mitzvá"],"איפור עדין המתאים לגיל":["Gentle, age-appropriate makeup","Maquillage doux adapté à l'âge","Maquillaje suave y adecuado a la edad"],
+"בת מצווה: איפור ותסרוקת":["Bat Mitzvah: makeup and hair","Bat Mitzvah : maquillage et coiffure","Bat Mitzvá: maquillaje y peinado"],"חבילה מלאה לחגיגה":["Full celebration package","Forfait complet pour la fête","Paquete completo para la celebración"],
+"אם בר המצווה או בת המצווה":["Mother of the Bar or Bat Mitzvah","Mère du Bar ou de la Bat Mitzvah","Madre del Bar o Bat Mitzvá"],"איפור ערב המותאם לאירוע":["Evening makeup suited to the event","Maquillage de soirée adapté à l'événement","Maquillaje de noche adaptado al evento"],
+"נשף סיום":["Prom","Bal de fin d'études","Graduación"],"זוהר, צעיר ומתאים לגיל":["Glamorous, youthful and age-appropriate","Glamour, jeune et adapté à l'âge","Glamuroso, juvenil y adecuado a la edad"],
+"פן או בייביליס":["Blow-dry or curls","Brushing ou boucles","Secado o rizos"],"שיער חלק, גלי או תלתלים רכים":["Straight, wavy or soft curls","Lisse, ondulé ou boucles souples","Liso, ondulado o rizos suaves"],
+"תסרוקת ערב אסופה":["Evening updo","Chignon de soirée","Recogido de noche"],"אסוף קלאסי, נמוך או גבוה":["Classic updo, low or high","Chignon classique, bas ou haut","Recogido clásico, bajo o alto"],
+"תסרוקת חצי אסופה":["Half-up hairstyle","Coiffure semi-attachée","Semirrecogido"],"רכה ונשית, מתאימה לכל אורך שיער":["Soft and feminine, suits any length","Douce et féminine, pour toutes les longueurs","Suave y femenino, para cualquier largo"],
+"צמות ותסרוקות לילדות":["Braids and styles for girls","Tresses et coiffures pour filles","Trenzas y peinados para niñas"],"לאירועים, לימי הולדת ולפורים":["For events, birthdays and Purim","Pour les événements, anniversaires et Pourim","Para eventos, cumpleaños y Purim"],
+"עיצוב פאה":["Wig styling","Coiffage de perruque","Peinado de peluca"],"סירוק, בייביליס והתאמה לאירוע":["Brushing, curling and styling for the event","Brossage, boucles et mise en forme pour l'événement","Cepillado, rizado y peinado para el evento"],
+"עיצוב מטפחת וכיסוי ראש":["Headscarf styling","Nouage de foulard","Peinado con pañuelo"],"קשירה חגיגית שנשארת במקומה כל הערב":["A festive wrap that stays in place all night","Un nouage festif qui tient toute la soirée","Un atado festivo que se mantiene toda la noche"],
+"תצוגות אופנה":["Fashion shows","Défilés de mode","Desfiles de moda"],"מראה אחיד לדוגמניות ועבודה מהירה מאחורי הקלעים":["A consistent look for all models and fast work backstage","Un look homogène pour les mannequins et un travail rapide en coulisses","Un look uniforme para las modelos y trabajo rápido entre bastidores"],
+"הפקות אופנה וצילום":["Fashion and photo productions","Productions mode et photo","Producciones de moda y foto"],"ליווי יום צילום, כולל תיקוני איפור בסט":["On set for the shoot day, including touch-ups","Présence sur le shooting, retouches comprises","Acompañamiento el día de la sesión, con retoques"],
+"בוק ותמונת תדמית":["Portfolio and headshots","Book et photo professionnelle","Book y foto profesional"],"איפור המותאם לצילום":["Makeup made for the camera","Maquillage adapté à la photo","Maquillaje adaptado a la cámara"],
+"צילומי הריון ומשפחה":["Maternity and family shoots","Séances grossesse et famille","Sesiones de embarazo y familia"],"טבעי ורענן":["Natural and fresh","Naturel et frais","Natural y fresco"],
+"טלוויזיה ובמה":["TV and stage","Télévision et scène","Televisión y escenario"],"עמיד לתאורה חזקה":["Holds up under strong lighting","Résiste aux éclairages puissants","Resiste la iluminación intensa"],
+"פורים ואיפור אמנותי":["Purim and artistic makeup","Pourim et maquillage artistique","Purim y maquillaje artístico"],"דמויות, צבעים ואפקטים":["Characters, colors and effects","Personnages, couleurs et effets","Personajes, colores y efectos"],
+"שיעור איפור אישי":["Private makeup lesson","Cours de maquillage particulier","Clase de maquillaje privada"],"לומדות על הפנים שלך ובמוצרים שלך":["Learn on your own face, with your own products","Apprenez sur votre visage, avec vos produits","Aprende en tu propia cara, con tus productos"],
+"סדנת איפור לקבוצה":["Group makeup workshop","Atelier maquillage en groupe","Taller de maquillaje en grupo"],"מסיבת רווקות, יום הולדת או גיבוש, עד 10 משתתפות":["Bachelorette, birthday or team event, up to 10 people","Enterrement de vie de jeune fille, anniversaire ou sortie d'équipe, jusqu'à 10 personnes","Despedida de soltera, cumpleaños o evento de equipo, hasta 10 personas"],
+"סדנת בת מצווה":["Bat Mitzvah workshop","Atelier Bat Mitzvah","Taller de Bat Mitzvá"],"טיפוח ואיפור עדין לנערות":["Skincare and gentle makeup for teens","Soins et maquillage doux pour adolescentes","Cuidado de la piel y maquillaje suave para adolescentes"],
+"ייעוץ מוצרים אישי":["Personal product consultation","Conseil produits personnalisé","Asesoría personal de productos"],"עוברות יחד על תיק האיפור שלך ובונות שגרת טיפוח":["We go through your makeup bag and build a routine","Nous passons en revue votre trousse et créons une routine","Revisamos juntas tu neceser y creamos una rutina"],
+"הדבקת ריסים":["Lash application","Pose de faux cils","Aplicación de pestañas"],"עיצוב גבות":["Brow shaping","Épilation des sourcils","Diseño de cejas"],"ליווי באירוע לתיקוני איפור":["On-site touch-ups during the event","Retouches pendant l'événement","Retoques durante el evento"],"הכנת העור לאיפור":["Skin prep","Préparation de la peau","Preparación de la piel"],
+"בסטודיו":["At the studio","Au studio","En el estudio"],"הגעה עד הבית":["Home visit","À domicile","A domicilio"],
+"בחרי תאריך כדי לראות את השעות האפשריות.":["Choose a date to see available times.","Choisissez une date pour voir les horaires.","Elige una fecha para ver los horarios."],
+"השעות מחושבות לפי משך השירות שבחרת.":["Times are based on the length of the service you chose.","Les horaires tiennent compte de la durée de la prestation.","Los horarios se calculan según la duración del servicio."],
+"בחרי שירות כדי לקבל שעות מדויקות.":["Choose a service for exact times.","Choisissez une prestation pour des horaires précis.","Elige un servicio para ver horarios exactos."],
+"משך השירות ארוך מיום העבודה הזה. ניתן לבחור יום אחר או לציין זאת בהערות.":["This service is longer than the working hours on this day. Choose another day or mention it in the notes.","Cette prestation dépasse les horaires de ce jour. Choisissez un autre jour ou indiquez-le dans les remarques.","Este servicio supera el horario de ese día. Elige otro día o indícalo en las notas."],
+"לוח הזמנים ביום האירוע":["Schedule for the day","Planning du jour J","Horario del día"],"הכלה":["The bride","La mariée","La novia"],"את":["You","Vous","Tú"],
+"לוח הזמנים מתחיל לפני שעות הפעילות. נתאם זאת בוואטסאפ.":["The schedule starts before opening hours. We'll arrange it on WhatsApp.","Le planning commence avant l'ouverture. Nous l'organiserons sur WhatsApp.","El horario empieza antes de la apertura. Lo coordinaremos por WhatsApp."],
+"בחרי תאריך כדי לקבוע את שעת ההתחלה.":["Choose a date to set the start time.","Choisissez une date pour fixer l'heure de début.","Elige una fecha para fijar la hora de inicio."],
+"הזיני שם מלא.":["Enter your full name.","Saisissez votre nom complet.","Escribe tu nombre completo."],
+"הזיני מספר טלפון נייד תקין, לדוגמה 050-1234567, או מספר בינלאומי שמתחיל ב-+.":["Enter a valid mobile number, e.g. 050-1234567, or an international number starting with +.","Saisissez un numéro de portable valide, ex. 050-1234567, ou un numéro international commençant par +.","Escribe un móvil válido, p. ej. 050-1234567, o un número internacional que empiece por +."],
+"הזיני כתובת להגעה.":["Enter the address.","Saisissez l'adresse.","Escribe la dirección."],
+"בחרי תאריך ושעה.":["Choose a date and time.","Choisissez une date et une heure.","Elige fecha y hora."],
+"בחרי שירות בשלב 1.":["Choose a service in step 1.","Choisissez une prestation à l'étape 1.","Elige un servicio en el paso 1."],
+"חסרים פרטים. הם מסומנים למעלה.":["Some details are missing. They're marked above.","Il manque des informations, indiquées plus haut.","Faltan datos. Están marcados arriba."],
+"חום רך":["Soft brown","Brun doux","Marrón suave"],"כלה בשעת הזהב":["Golden-hour bride","Mariée à l'heure dorée","Novia en la hora dorada"],"נצנוץ קרמל":["Caramel shimmer","Caramel scintillant","Brillo caramelo"],"ברונזה זוהרת":["Glowing bronze","Bronze lumineux","Bronce luminoso"],"עפעף שנהב":["Ivory lid","Paupière ivoire","Párpado marfil"],"זהב ואפרסק":["Gold and peach","Or et pêche","Oro y melocotón"],"ורוד קייצי":["Summer pink","Rose d'été","Rosa de verano"],"לילה מעושן":["Smoky night","Nuit fumée","Noche ahumada"],"חום מעושן":["Smoky brown","Brun fumé","Marrón ahumado"],"שזיף ותוחם עיניים":["Plum and liner","Prune et eye-liner","Ciruela y delineador"],
+"שפתיים":["Lips","Lèvres","Labios"],"עפעף":["Eyelid","Paupière","Párpado"],"לחי":["Cheek","Joue","Mejilla"],
+"מה האירוע?":["What's the occasion?","Quelle est l'occasion ?","¿Cuál es la ocasión?"],"החתונה שלי":["My wedding","Mon mariage","Mi boda"],"ערב או אירוע":["An evening or event","Une soirée ou un événement","Una noche o evento"],"צילומים או הפקה":["A shoot or production","Un shooting ou une production","Una sesión o producción"],
+"איזו עוצמת איפור את מעדיפה?":["How bold do you like your makeup?","Quelle intensité de maquillage préférez-vous ?","¿Qué intensidad de maquillaje prefieres?"],"טבעית ונקייה":["Natural and clean","Naturel et épuré","Natural y limpio"],"זוהרת":["Glowing","Lumineux","Luminoso"],"דרמטית לערב":["Dramatic for evening","Intense pour le soir","Intenso para la noche"],
+"אילו גוונים את מעדיפה?":["Which shades do you prefer?","Quelles teintes préférez-vous ?","¿Qué tonos prefieres?"],"חום וברונזה":["Brown and bronze","Brun et bronze","Marrón y bronce"],"ורוד ואפרסק":["Pink and peach","Rose et pêche","Rosa y melocotón"],"אפור מעושן ושזיף":["Smoky grey and plum","Gris fumé et prune","Gris ahumado y ciruela"],
+"קביעת תור בסגנון הזה":["Book this look","Réserver ce look","Reservar este look"],"התחלה מחדש":["Start over","Recommencer","Empezar de nuevo"]
+};
+const L3={en:0,fr:1,es:2};
+const tri=(a,b,c)=>[a,b,c];
+const PAT=[
+  [/^(?:(שעה|שעתיים|(\d+) שעות))?(?: ו-)?(?:(\d+) דקות)?$/,m=>{if(!m[1]&&!m[3])return null;const h=m[1]==='שעה'?1:m[1]==='שעתיים'?2:+(m[2]||0),r=+(m[3]||0),s=[h?h+' h':'',r?r+' min':''].filter(Boolean).join(' ');return tri(s,s,s)}],
+  [/^החל מ-(.+)$/,m=>tri('From '+m[1],'Dès '+m[1],'Desde '+m[1])],
+  [/^(.+) \(\+(.+)\)$/,m=>{const t=tr(m[1]);return tri(t+' (+'+m[2]+')',t+' (+'+m[2]+')',t+' (+'+m[2]+')')}],
+  [/^(.+?)(?: × (\d+))?(?: \+ (\d+) מלוות)?$/,m=>{if(!m[2]&&!m[3])return null;const t=tr(m[1]),x=m[2]?' × '+m[2]:'',p=n=>m[3]?' + '+m[3]+' '+n:'';return tri(t+x+p('companions'),t+x+p('proches'),t+x+p('acompañantes'))}],
+  [/^(.+?) · הערכה (.+?)( · .+)?$/,m=>{const d=tr(m[1]),e=m[3]||'';return tri(d+' · estimate '+m[2]+e,d+' · estimation '+m[2]+e,d+' · estimación '+m[2]+e)}],
+  [/^מלווה (\d+)$/,m=>tri('Bridesmaid '+m[1],'Proche '+m[1],'Acompañante '+m[1])],
+  [/^אישה (\d+)$/,m=>tri('Guest '+m[1],'Personne '+m[1],'Persona '+m[1])],
+  [/^כולל (\d+) דקות מרווח לפני היציאה\.$/,m=>tri('Includes '+m[1]+' minutes of spare time before you leave.','Inclut '+m[1]+' minutes de marge avant le départ.','Incluye '+m[1]+' minutos de margen antes de salir.')],
+  [/^התחלה בשעה (.+)$/,m=>tri('Start at '+m[1],'Commencer à '+m[1],'Empezar a las '+m[1])],
+  [/^התאריך העברי: (.+)$/,m=>tri('Hebrew date: '+m[1],'Date hébraïque : '+m[1],'Fecha hebrea: '+m[1])],
+  [/^הסגנון המתאים לך: (.+)$/,m=>{const t=tr(m[1]);return tri('Your look: '+t,'Votre look : '+t,'Tu look: '+t)}],
+  [/^הסגנון (.+) מתוך העבודות של ניצה$/,m=>{const t=tr(m[1]);return tri('The '+t+' look from Nitza\'s work','Le look '+t+' de Nitza','El look '+t+' de Nitza')}],
+  [/^אם וואטסאפ לא ייפתח, העתיקי את ההודעה ושלחי אותה ידנית למספר (\+\d+)\.$/,m=>tri("If WhatsApp doesn't open, copy the message and send it to "+m[1]+'.',"Si WhatsApp ne s'ouvre pas, copiez le message et envoyez-le au "+m[1]+'.','Si WhatsApp no se abre, copia el mensaje y envíalo al '+m[1]+'.')]
+];
+function tr(s){
+  if(LANG==='he'||s==null)return s;
+  const k=s.trim();if(!k)return s;
+  const i=L3[LANG];let out=null;
+  if(TR[k])out=TR[k][i];
+  else for(const[re,f]of PAT){const m=k.match(re);if(m){const r=f(m);if(r){out=r[i];break}}}
+  return out==null?s:s.replace(k,out);
+}
+const ORIG=new WeakMap(),SHOWN=new WeakMap(),ATTRS=['placeholder','aria-label','alt','title'];
+function translateTree(root){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  for(let n;(n=w.nextNode());){
+    if(n.parentElement&&n.parentElement.closest('textarea,script,style,.langs'))continue;
+    let o=ORIG.get(n);
+    if(o===undefined||n.nodeValue!==SHOWN.get(n)){o=n.nodeValue;ORIG.set(n,o)}
+    const v=tr(o);if(n.nodeValue!==v)n.nodeValue=v;SHOWN.set(n,v);
+  }
+  root.querySelectorAll('[placeholder],[aria-label],[alt],[title]').forEach(el=>{
+    if(el.closest('.langs'))return;
+    const sh=el.__shown||(el.__shown={});
+    ATTRS.forEach(a=>{
+      if(!el.hasAttribute(a))return;
+      const cur=el.getAttribute(a),key='data-he-'+a;
+      let o=el.getAttribute(key);
+      if(o===null||cur!==sh[a]){o=cur;el.setAttribute(key,o)}
+      const v=tr(o);if(cur!==v)el.setAttribute(a,v);sh[a]=v;
+    });
+  });
+}
+const WRAP=$('wrap'),MO_OPTS={childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['aria-label','alt','placeholder','title']};
+const MO=new MutationObserver(()=>{MO.disconnect();translateTree(WRAP);MO.observe(WRAP,MO_OPTS)});
+function setLang(l,save){
+  LANG=LANGS[l]?l:'he';
+  const L=LANGS[LANG],root=document.documentElement;
+  root.lang=LANG;root.dir=L.dir;document.body.style.direction=L.dir;WRAP.dir=L.dir;
+  document.title=tr('תורים אצל ניצה דהן');
+  $('prev').textContent=L.dir==='rtl'?'›':'‹';$('next').textContent=L.dir==='rtl'?'‹':'›';
+  document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===LANG?'true':'false'));
+  if(save){try{localStorage.setItem('nd-lang',LANG)}catch{}}
+  MO.disconnect();
+  renderLook();renderAll();
+  translateTree(WRAP);
+  MO.observe(WRAP,MO_OPTS);
+}
+document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang,true)));
+$('bigText').addEventListener('click',()=>{
+  const on=document.documentElement.classList.toggle('big');
+  $('bigText').setAttribute('aria-pressed',on?'true':'false');
+  $('bigText').textContent=on?'הקטנת טקסט':'הגדלת טקסט';
+  try{localStorage.setItem('nd-big',on?'1':'')}catch{}
+});
+try{if(localStorage.getItem('nd-big')==='1')$('bigText').click()}catch{}
+
 $('brand').textContent=CONFIG.studio;
 $('demo').hidden=!CONFIG.demo;
-renderLook();
-renderAll();
+let startLang='he';
+const hashLang=(location.hash||'').slice(1);
+if(LANGS[hashLang])startLang=hashLang;
+else{try{const s=localStorage.getItem('nd-lang');if(LANGS[s])startLang=s}catch{}}
+setLang(startLang,false);
 </script>
 
 </body></html>
