@@ -30,6 +30,13 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px solid 
 .skip:focus{top:calc(8px + env(safe-area-inset-top,0px))}
 .a11y{font-size:.92rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;display:grid;gap:6px}
 .a11y h2{font-size:1.35rem}
+#partyRows{display:grid;gap:12px;max-width:640px;justify-items:start}
+.person{display:grid;gap:10px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.phead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.phead b{font:400 1.25rem var(--display)}
+.person select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+.person select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.person .field span{font-weight:600;font-size:.94rem}
 .wrap{max-width:860px;margin-inline:auto;padding-block:28px 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:40px}
 .logo{display:grid;justify-items:center;gap:6px;direction:ltr;text-align:center}
 .logoName{font:400 clamp(2.4rem,8vw,3.6rem)/1 var(--display);letter-spacing:.02em}
@@ -199,14 +206,10 @@ input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outli
     </div>
     <div id="partyWrap" hidden>
       <div class="lbl">כמה מלוות יתאפרו איתך באותו היום?</div>
-      <div class="stepper">
-        <button type="button" id="pMinus" aria-label="פחות מלוות">−</button>
-        <output id="party" aria-live="polite">0</output>
-        <button type="button" id="pPlus" aria-label="יותר מלוות">+</button>
-      </div>
-      <p class="hint" id="partyHint" aria-live="polite"></p>
+      <p class="hint">הוסיפי כל מלווה בנפרד, ובחרי לה שירות ותוספות משלה.</p>
+      <div id="partyRows" role="group" aria-label="מלוות"></div>
     </div>
-    <div class="lbl">תוספות</div>
+    <div class="lbl" id="addonsLbl">תוספות</div>
     <div class="choices" id="addons" role="group" aria-label="תוספות"></div>
   </section>
 
@@ -296,7 +299,12 @@ const CATS=[
     {id:'esc-mu',n:'איפור למלווה',d:'אחיות, גיסות וחברות',m:60,p:400},
     {id:'esc-full',n:'איפור ועיצוב שיער למלווה',d:'מוכנות לצילומים',m:120,p:800},
     {id:'esc-hair',n:'תסרוקת למלווה',d:'שיער גלי, אסוף או חצי אסוף',m:45,p:400},
-    {id:'esc-grandma',n:'סבתות הכלה והחתן',d:'איפור עדין ונוח לעור בוגר',m:45,p:350}]},
+    {id:'esc-grandma',n:'סבתות הכלה והחתן',d:'איפור עדין ונוח לעור בוגר',m:45,p:350},
+    {id:'esc-momfull',n:'איפור ועיצוב שיער לאם הכלה או החתן',d:'מראה מלא ומוקפד לאירוע',m:120,p:850},
+    {id:'esc-blow',n:'פן או בייביליס למלווה',d:'שיער חלק או גלי, מוכן לצילומים',m:45,p:350},
+    {id:'esc-wig',n:'עיצוב פאה למלווה',d:'סירוק והתאמה לאירוע',m:60,p:350},
+    {id:'esc-scarf',n:'עיצוב מטפחת למלווה',d:'קשירה חגיגית שנשארת במקומה',m:30,p:150},
+    {id:'esc-girls',n:'ילדות ופרחוניות',d:'איפור עדין או תסרוקת לילדות בחתונה',m:30,p:150}]},
   {id:'event',name:'ערב ואירועים',c:'var(--p3)',ready:true,note:'',items:[
     {id:'ev-night',n:'איפור ערב',d:'לחתונה, לגאלה או לבילוי',m:60,p:450},
     {id:'ev-full',n:'איפור ועיצוב שיער לאירוע',d:'מראה ערב שלם',m:120,p:800},
@@ -341,24 +349,36 @@ const parseIso=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d
 const today=new Date();today.setHours(0,0,0,0);
 const firstBookable=new Date(today);firstBookable.setDate(firstBookable.getDate()+1);
 const lastMonth=new Date(today.getFullYear(),today.getMonth()+CONFIG.monthsAhead,1);
-const S={cat:'bride',svc:null,loc:'studio',addons:new Set(),count:1,party:0,wait:false,date:null,time:null,view:new Date(today.getFullYear(),today.getMonth(),1)};
+const S={cat:'bride',svc:null,loc:'studio',addons:new Set(),count:1,people:[],wait:false,date:null,time:null,view:new Date(today.getFullYear(),today.getMonth(),1)};
 const cat=()=>CATS.find(c=>c.id===S.cat);
 const svc=()=>S.svc&&CATS.flatMap(c=>c.items).find(i=>i.id===S.svc);
 const svcCat=()=>S.svc?CATS.find(c=>c.items.some(i=>i.id===S.svc)):cat();
 const count=()=>svcCat().group?S.count:1;
 const chosenAddons=()=>ADDONS.filter(a=>S.addons.has(a.id));
 // מלוות שמצטרפות לכלה באותו בוקר, וההפסקה בין סיום האיפור לשעת היציאה
-// כל מלווה מקבלת את השירות המקביל לשירות של הכלה: איפור, איפור ושיער, או תסרוקת
-const ESC_MAP={'bride-mu':'esc-mu','bride-full':'esc-full','bride-hair':'esc-hair'},PARTY=new Set(Object.keys(ESC_MAP)),BUFFER=15;
-const escort=()=>CATS.flatMap(c=>c.items).find(i=>i.id===(ESC_MAP[S.svc]||'esc-mu'));
-const party=()=>PARTY.has(S.svc)?S.party:0;
-function minutes(){const s=svc();if(!s)return 0;return s.m*count()+party()*escort().m+chosenAddons().reduce((t,a)=>t+a.m,0)}
-function price(){const s=svc();if(!s)return 0;return s.p*count()+party()*escort().p+chosenAddons().reduce((t,a)=>t+a.p,0)+(S.loc==='home'?CONFIG.homeFee:0)}
+// מלוות שמצטרפות לכלה: לכל מלווה נבחר שירות משלה, וכמה מלוות לכל שירות
+const PARTY=new Set(['bride-mu','bride-full','bride-hair']),BUFFER=15;
+const PARTY_TYPES=['esc-mom','esc-momfull','esc-mu','esc-full','esc-hair','esc-blow','esc-wig','esc-scarf','esc-girls'];
+const item=id=>CATS.flatMap(c=>c.items).find(i=>i.id===id);
+// כל מלווה היא רשומה נפרדת: השירות שלה והתוספות שלה
+const partyOn=()=>PARTY.has(S.svc);
+const people=()=>partyOn()?S.people:[];
+const party=()=>people().length;
+const pAddons=p=>ADDONS.filter(a=>p.ad.includes(a.id));
+const pMin=p=>item(p.svc).m+pAddons(p).reduce((t,a)=>t+a.m,0);
+const pPrice=p=>item(p.svc).p+pAddons(p).reduce((t,a)=>t+a.p,0);
+function minutes(){const s=svc();if(!s)return 0;return s.m*count()+people().reduce((t,p)=>t+pMin(p),0)+chosenAddons().reduce((t,a)=>t+a.m,0)}
+function price(){const s=svc();if(!s)return 0;return s.p*count()+people().reduce((t,p)=>t+pPrice(p),0)+chosenAddons().reduce((t,a)=>t+a.p,0)+(S.loc==='home'?CONFIG.homeFee:0)}
 // פירוט המחיר לפי רכיבים, להודעה ולמסך
 function priceLines(){
   const s=svc();if(!s)return[];
+  if(partyOn()){
+    const L=[['הכלה: '+[s.n,...chosenAddons().map(a=>a.n)].join(' + '),s.p+chosenAddons().reduce((t,a)=>t+a.p,0)]];
+    people().forEach((p,k)=>L.push(['מלווה '+(k+1)+': '+[item(p.svc).n,...pAddons(p).map(a=>a.n)].join(' + '),pPrice(p)]));
+    if(S.loc==='home')L.push(['הגעה עד הבית',CONFIG.homeFee]);
+    return L;
+  }
   const L=[[s.n+(count()>1?' × '+count():''),s.p*count()]];
-  if(party())L.push([escort().n+' × '+party(),escort().p*party()]);
   chosenAddons().forEach(a=>L.push([a.n,a.p]));
   if(S.loc==='home')L.push(['הגעה עד הבית',CONFIG.homeFee]);
   return L;
@@ -371,7 +391,7 @@ function schedule(){
   const[h,m]=r.split(':').map(Number),extra=chosenAddons().reduce((t,a)=>t+a.m,0),rows=[];
   let end=h*60+m-BUFFER;
   const add=(who,len)=>{rows.unshift({who,from:end-len,to:end});end-=len};
-  if(party()){add('הכלה',s.m+extra);for(let i=party();i>=1;i--)add('מלווה '+i,escort().m)}
+  if(party()){add('הכלה',s.m+extra);for(let k=people().length;k>=1;k--)add('מלווה '+k,pMin(people()[k-1]))}
   else if(count()>1){for(let i=count();i>=1;i--)add('אישה '+i,s.m+(i===count()?extra:0))}
   else add('את',s.m+extra);
   return rows[0].from<0?null:rows;
@@ -410,8 +430,10 @@ function renderExtras(){
   $('countWrap').hidden=!sc.group;
   $('count').textContent=S.count;
   $('partyWrap').hidden=!PARTY.has(S.svc);
-  $('party').textContent=S.party;
-  if(PARTY.has(S.svc))$('partyHint').textContent='כל מלווה: '+escort().n+', '+nis(escort().p);
+  $('addonsLbl').textContent=partyOn()?'תוספות לכלה':'תוספות';
+  $('addons').setAttribute('aria-label',partyOn()?'תוספות לכלה':'תוספות');
+  const pa=ADDONS.filter(a=>!a.only);
+  $('partyRows').innerHTML=S.people.map((p,k)=>`<div class="person"><div class="phead"><b>מלווה ${k+1}</b><button type="button" class="chip" data-prm="${k}" aria-label="הסרת מלווה ${k+1}">הסרה</button></div><label class="field"><span>שירות</span><select data-psvc="${k}" aria-label="שירות למלווה ${k+1}">${PARTY_TYPES.map(id=>{const i=item(id);return `<option value="${id}" ${p.svc===id?'selected':''}>${i.n} – ${nis(i.p)}</option>`}).join('')}</select></label><div class="choices" role="group" aria-label="תוספות למלווה ${k+1}">${pa.map(a=>`<button type="button" class="chip" data-pad="${k}:${a.id}" aria-pressed="${p.ad.includes(a.id)}">${a.n} (+${nis(a.p)})</button>`).join('')}</div></div>`).join('')+(S.people.length<12?`<button type="button" class="btn ghost" data-padd="1">+ הוספת מלווה</button>`:'');
   $('readyWrap').hidden=!sc.ready;
 }
 function isOpen(d){return !!CONFIG.hours[d.getDay()]&&d>=firstBookable&&!(CONFIG.closeHolidays&&isHoliday(d))}
@@ -512,8 +534,20 @@ $('prev').onclick=()=>{S.view=new Date(S.view.getFullYear(),S.view.getMonth()-1,
 $('next').onclick=()=>{S.view=new Date(S.view.getFullYear(),S.view.getMonth()+1,1);renderCal()};
 $('minus').onclick=()=>{S.count=Math.max(1,S.count-1);renderExtras();renderSlots();renderSummary()};
 $('plus').onclick=()=>{S.count=Math.min(12,S.count+1);renderExtras();renderSlots();renderSummary()};
-$('pMinus').onclick=()=>{S.party=Math.max(0,S.party-1);renderExtras();renderSlots();renderSummary()};
-$('pPlus').onclick=()=>{S.party=Math.min(8,S.party+1);renderExtras();renderSlots();renderSummary()};
+function partyChanged(focusSel){renderExtras();renderSlots();renderSummary();const f=focusSel&&$('partyRows').querySelector(focusSel);(f||$('partyRows').querySelector('[data-padd]'))?.focus()}
+$('partyRows').addEventListener('click',e=>{
+  const b=e.target.closest('[data-padd],[data-prm],[data-pad]');if(!b)return;
+  if(b.dataset.padd){S.people.push({svc:'esc-mu',ad:[]});return partyChanged('[data-psvc="'+(S.people.length-1)+'"]')}
+  if(b.dataset.prm){S.people.splice(+b.dataset.prm,1);return partyChanged(null)}
+  const[k,a]=b.dataset.pad.split(':'),p=S.people[+k];
+  p.ad=p.ad.includes(a)?p.ad.filter(x=>x!==a):[...p.ad,a];
+  partyChanged('[data-pad="'+k+':'+a+'"]');
+});
+$('partyRows').addEventListener('change',e=>{
+  const s=e.target.closest('[data-psvc]');if(!s)return;
+  S.people[+s.dataset.psvc].svc=s.value;
+  partyChanged('[data-psvc="'+s.dataset.psvc+'"]');
+});
 $('wait').onclick=()=>{S.wait=!S.wait;$('wait').setAttribute('aria-pressed',S.wait);renderSummary()};
 $('toForm').onclick=()=>{const target=!svc()?'h1s':(!S.date||!S.time)?'h3s':'h4s';$(target).scrollIntoView({behavior:SMOOTH(),block:'start'})};
 ['name','phone','allergy','notes','addr','ready'].forEach(id=>$(id).addEventListener('input',renderSummary));
@@ -727,6 +761,17 @@ const TR={
 "מה האירוע?":["What's the occasion?","Quelle est l'occasion ?","¿Cuál es la ocasión?"],"החתונה שלי":["My wedding","Mon mariage","Mi boda"],"ערב או אירוע":["An evening or event","Une soirée ou un événement","Una noche o evento"],"צילומים או הפקה":["A shoot or production","Un shooting ou une production","Una sesión o producción"],
 "איזו עוצמת איפור את מעדיפה?":["How bold do you like your makeup?","Quelle intensité de maquillage préférez-vous ?","¿Qué intensidad de maquillaje prefieres?"],"טבעית ונקייה":["Natural and clean","Naturel et épuré","Natural y limpio"],"זוהרת":["Glowing","Lumineux","Luminoso"],"דרמטית לערב":["Dramatic for evening","Intense pour le soir","Intenso para la noche"],
 "אילו גוונים את מעדיפה?":["Which shades do you prefer?","Quelles teintes préférez-vous ?","¿Qué tonos prefieres?"],"חום וברונזה":["Brown and bronze","Brun et bronze","Marrón y bronce"],"ורוד ואפרסק":["Pink and peach","Rose et pêche","Rosa y melocotón"],"אפור מעושן ושזיף":["Smoky grey and plum","Gris fumé et prune","Gris ahumado y ciruela"],
+"הוסיפי כל מלווה בנפרד, ובחרי לה שירות ותוספות משלה.":["Add each companion separately and choose her own service and extras.","Ajoutez chaque proche séparément et choisissez sa prestation et ses options.","Añade cada acompañante por separado y elige su servicio y extras."],
+"תוספות לכלה":["Extras for the bride","Options pour la mariée","Extras para la novia"],
+"הסרה":["Remove","Retirer","Quitar"],
+"שירות":["Service","Prestation","Servicio"],
+"+ הוספת מלווה":["+ Add a companion","+ Ajouter une proche","+ Añadir acompañante"],
+"מלוות":["Bridal party","Proches","Acompañantes"],
+"איפור ועיצוב שיער לאם הכלה או החתן":["Makeup and hair for the mother of the bride or groom","Maquillage et coiffure pour la mère des mariés","Maquillaje y peinado para la madre de los novios"],"מראה מלא ומוקפד לאירוע":["A complete, polished look for the event","Un look complet et soigné pour l'événement","Un look completo y cuidado para el evento"],
+"פן או בייביליס למלווה":["Blow-dry or curls for the bridal party","Brushing ou boucles pour les proches","Secado o rizos para acompañantes"],"שיער חלק או גלי, מוכן לצילומים":["Straight or wavy hair, ready for photos","Cheveux lisses ou ondulés, prêts pour les photos","Pelo liso u ondulado, listo para las fotos"],
+"עיצוב פאה למלווה":["Wig styling for the bridal party","Coiffage de perruque pour les proches","Peinado de peluca para acompañantes"],"סירוק והתאמה לאירוע":["Brushing and styling for the event","Brossage et mise en forme pour l'événement","Cepillado y peinado para el evento"],
+"עיצוב מטפחת למלווה":["Headscarf styling for the bridal party","Nouage de foulard pour les proches","Pañuelo para acompañantes"],"קשירה חגיגית שנשארת במקומה":["A festive wrap that stays in place","Un nouage festif qui tient bien","Un atado festivo que se mantiene en su sitio"],
+"ילדות ופרחוניות":["Flower girls and young girls","Petites filles et demoiselles d'honneur","Niñas y damitas de honor"],"איפור עדין או תסרוקת לילדות בחתונה":["Gentle makeup or a hairstyle for girls at the wedding","Maquillage léger ou coiffure pour les petites filles du mariage","Maquillaje suave o peinado para las niñas de la boda"],
 "קביעת תור בסגנון הזה":["Book this look","Réserver ce look","Reservar este look"],"התחלה מחדש":["Start over","Recommencer","Empezar de nuevo"]
 };
 const L3={en:0,fr:1,es:2};
@@ -737,7 +782,12 @@ const PAT=[
   [/^(.+) \(\+(.+)\)$/,m=>{const t=tr(m[1]);return tri(t+' (+'+m[2]+')',t+' (+'+m[2]+')',t+' (+'+m[2]+')')}],
   [/^(.+?)(?: × (\d+))?(?: \+ (\d+) מלוות)?$/,m=>{if(!m[2]&&!m[3])return null;const t=tr(m[1]),x=m[2]?' × '+m[2]:'',p=n=>m[3]?' + '+m[3]+' '+n:'';return tri(t+x+p('companions'),t+x+p('proches'),t+x+p('acompañantes'))}],
   [/^(.+?) · הערכה (.+?)( · .+)?$/,m=>{const d=tr(m[1]),e=m[3]||'';return tri(d+' · estimate '+m[2]+e,d+' · estimation '+m[2]+e,d+' · estimación '+m[2]+e)}],
-  [/^כל מלווה: (.+), (.+)$/,m=>{const t=tr(m[1]);return tri('Each companion: '+t+', '+m[2],'Par proche : '+t+', '+m[2],'Cada acompañante: '+t+', '+m[2])}],
+  [/^הסרת מלווה (\d+)$/,m=>tri('Remove companion '+m[1],'Retirer la proche '+m[1],'Quitar acompañante '+m[1])],
+  [/^שירות למלווה (\d+)$/,m=>tri('Service for companion '+m[1],'Prestation de la proche '+m[1],'Servicio de acompañante '+m[1])],
+  [/^תוספות למלווה (\d+)$/,m=>tri('Extras for companion '+m[1],'Options de la proche '+m[1],'Extras de acompañante '+m[1])],
+  [/^(.+) – (\d[\d,]* ₪)$/,m=>{const t=tr(m[1]);return tri(t+' – '+m[2],t+' – '+m[2],t+' – '+m[2])}],
+  [/^הסרה: (.+)$/,m=>{const t=tr(m[1]);return tri('Remove: '+t,'Retirer : '+t,'Quitar: '+t)}],
+  [/^הוספה: (.+)$/,m=>{const t=tr(m[1]);return tri('Add: '+t,'Ajouter : '+t,'Añadir: '+t)}],
   [/^מלווה (\d+)$/,m=>tri('Bridesmaid '+m[1],'Proche '+m[1],'Acompañante '+m[1])],
   [/^אישה (\d+)$/,m=>tri('Guest '+m[1],'Personne '+m[1],'Persona '+m[1])],
   [/^כולל (\d+) דקות מרווח לפני היציאה\.$/,m=>tri('Includes '+m[1]+' minutes of spare time before you leave.','Inclut '+m[1]+' minutes de marge avant le départ.','Incluye '+m[1]+' minutos de margen antes de salir.')],
